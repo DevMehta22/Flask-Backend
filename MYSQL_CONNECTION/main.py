@@ -1,4 +1,4 @@
-from app import app,mysql
+from app import app,mysql,encode_token
 from bson.json_util import dumps
 from bson.objectid import ObjectId
 from flask import jsonify,request
@@ -41,7 +41,7 @@ def signup():
             mysql.commit()
             #closing the cursor
             cursor.close()
-            resp = jsonify("user registration successful!")
+            resp = jsonify("user registration successfull!")
             resp.status_code = 200
             return resp
 
@@ -67,10 +67,16 @@ def login():
         cursor.close()
         
         if user:
+            print(user[0])
             if bcrypt.check_password_hash(user[1],password):
-                resp = jsonify("you are successfully logged in")
-                resp.status_code = 200
-                return resp
+                auth_token = encode_token(user[0])
+                msg = {
+                    
+                    "message":"successfully logged in",
+                    "auth_token":auth_token
+                }
+                
+                return jsonify(msg)
             else:
                 resp = jsonify("Incorrect password")
                 resp.status_code = 400
@@ -81,4 +87,4 @@ def login():
             return resp   
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,host='localhost')
